@@ -11,10 +11,9 @@
 #define APPH self.view.frame.size.height
 #define APPW self.view.frame.size.width
 
-@interface ViewController () <DPMDatePickerViewDelegate> {
-    DPMDatePickerView *datePickerView;
-}
+@interface ViewController ()
 
+@property (nonatomic, strong) DPMDatePickerView *datePickerView;
 @end
 
 @implementation ViewController
@@ -31,28 +30,35 @@
     [addBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [addBtn addTarget:self action:@selector(addBtnAction) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:addBtn];
-    datePickerView = [[DPMDatePickerView alloc] initWithFrame:CGRectMake(0, APPH - 260, APPW, 260)];
-    datePickerView.delegate = self;
-    
 }
 - (void)addBtnAction {
-    [self.view addSubview:datePickerView];
+    self.datePickerView.hidden = NO;
 }
 
-#pragma mark DPMDatePickerViewDelegate
-
-- (void)datePickerViewCancelAction {
-    [datePickerView removeFromSuperview];
-}
-- (void)datePickerViewOk:(NSString *)dateStr {
-    [datePickerView removeFromSuperview];
-    NSLog(@"%@", dateStr);
+- (void)printDate:(NSString *)dateStr
+{
+    NSLog(@"你选择的日期是:%@", dateStr);
 }
 
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+#pragma mark - setMethods
+- (DPMDatePickerView *)datePickerView
+{
+    if (!_datePickerView) {
+        _datePickerView = [[DPMDatePickerView alloc] initWithFrame:CGRectMake(0, APPH - 260, APPW, 260)];
+        __weak typeof(self) weakSelf = self;
+        _datePickerView.cancelBlock = ^{
+            typeof(weakSelf) strongSelf = weakSelf;
+            strongSelf.datePickerView.hidden = YES;
+        };
+        _datePickerView.okBlock = ^(NSString *dateStr) {
+            typeof(weakSelf) strongSelf = weakSelf;
+            strongSelf.datePickerView.hidden = YES;
+            [strongSelf printDate:dateStr];
+        };
+        [self.view addSubview:_datePickerView];
+    }
+    [self.view bringSubviewToFront:_datePickerView];
+    return _datePickerView;
 }
 
 @end

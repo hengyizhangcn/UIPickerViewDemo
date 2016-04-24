@@ -6,9 +6,18 @@
 //  Copyright (c) 2015年 com.zhy. All rights reserved.
 //
 
-#import "DPMDatePickerView.h"
+#import "DPMdatePickerView.h"
 #define APPH self.frame.size.height
 #define APPW self.frame.size.width
+
+@interface DPMDatePickerView () <UIPickerViewDataSource, UIPickerViewDelegate>
+
+@property (nonatomic, strong) UIPickerView *datePickerView;
+
+@property (nonatomic, strong) UIButton *cancelButton;
+@property (nonatomic, strong) UIButton *okButton;
+
+@end
 
 @implementation DPMDatePickerView
 
@@ -22,13 +31,18 @@
 
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
-    if (self != nil) {
+    if (self) {
         [self addDatePicker];
     }
     return self;
 }
 
 - (void)addDatePicker {
+    UIView *line = [[UIView alloc] initWithFrame:CGRectMake(0, 0, APPW, 0.5)];
+    line.backgroundColor = [UIColor grayColor];
+    line.alpha = 0.5;
+    [self addSubview:line];
+    
     self.cancelButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50, 40)];
     self.cancelButton.titleLabel.textAlignment = NSTextAlignmentRight;
     [self.cancelButton setTitle:@"取消" forState:UIControlStateNormal];
@@ -43,9 +57,9 @@
     [self.okButton addTarget:self action:@selector(okBtnAction) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:self.okButton];
     
-    _datepickerView = [[UIPickerView alloc] initWithFrame:CGRectMake(0, 40, APPW, APPH - 40)];
-    _datepickerView.delegate = self;
-    _datepickerView.dataSource = self;
+    self.datePickerView = [[UIPickerView alloc] initWithFrame:CGRectMake(0, 40, APPW, APPH - 40)];
+    self.datePickerView.delegate = self;
+    self.datePickerView.dataSource = self;
     NSDate *now = [NSDate date];
     NSCalendar *cal = [NSCalendar currentCalendar];
     unsigned int unitFlags = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay;
@@ -53,21 +67,26 @@
     NSInteger year = [dd year];
     NSInteger month = [dd month];
     NSInteger day = [dd day];
-    [_datepickerView selectRow:(year - 1900) inComponent:0 animated:NO];
-    [_datepickerView selectRow:(month - 1) inComponent:1 animated:NO];
-    [_datepickerView selectRow:(day - 1) inComponent:2 animated:NO];
-    [self addSubview:_datepickerView];
+    [self.datePickerView selectRow:(year - 1900) inComponent:0 animated:NO];
+    [self.datePickerView selectRow:(month - 1) inComponent:1 animated:NO];
+    [self.datePickerView selectRow:(day - 1) inComponent:2 animated:NO];
+    [self addSubview:self.datePickerView];
 }
 
 - (void)cancelBtnAction {
-    [self.delegate datePickerViewCancelAction];
+    if (self.cancelBlock) {
+        self.cancelBlock();
+    }
 }
 
 - (void)okBtnAction {
-    NSString *year = [self pickerView:_datepickerView titleForRow:[_datepickerView selectedRowInComponent:0] forComponent:0];
-    NSString *month = [self pickerView:_datepickerView titleForRow:[_datepickerView selectedRowInComponent:1] forComponent:1];
-    NSString *day = [self pickerView:_datepickerView titleForRow:[_datepickerView selectedRowInComponent:2] forComponent:2];
-    [self.delegate datePickerViewOk:[NSString stringWithFormat:@"%@-%@-%@", year, month, day]];
+    NSString *year = [self pickerView:self.datePickerView titleForRow:[self.datePickerView selectedRowInComponent:0] forComponent:0];
+    NSString *month = [self pickerView:self.datePickerView titleForRow:[self.datePickerView selectedRowInComponent:1] forComponent:1];
+    NSString *day = [self pickerView:self.datePickerView titleForRow:[self.datePickerView selectedRowInComponent:2] forComponent:2];
+    
+    if (self.okBlock) {
+        self.okBlock([NSString stringWithFormat:@"%@-%@-%@", year, month, day]);
+    }
 }
 
 #pragma mark UIPickerViewDataSource

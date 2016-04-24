@@ -7,19 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
-@protocol DPMDatePickerViewDelegate;
 
-@interface DPMDatePickerView : UIView <UIPickerViewDataSource, UIPickerViewDelegate> {
-    UIPickerView *_datepickerView;
-}
-@property (nonatomic, strong) UIButton *cancelButton;
-@property (nonatomic, strong) UIButton *okButton;
-@property (nonatomic, assign) id<DPMDatePickerViewDelegate> delegate;
-@end
-
-@protocol  DPMDatePickerViewDelegate<NSObject>
-
-- (void)datePickerViewCancelAction;
-- (void)datePickerViewOk:(NSString *)dateStr;
-
+@interface DPMDatePickerView : UIView
+/**
+ *  取消
+ */
+@property (nonatomic, copy) void(^cancelBlock)();
+/**
+ *  确定block，回传日期字符串，格式：年-月-日
+ */
+@property (nonatomic, copy) void(^okBlock)(NSString *dateStr);
 @end
