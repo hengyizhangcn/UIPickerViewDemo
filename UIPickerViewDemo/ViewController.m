@@ -14,6 +14,8 @@
 @interface ViewController ()
 
 @property (nonatomic, strong) DPMDatePickerView *datePickerView;
+
+@property (nonatomic, strong) UILabel *dateLabel;
 @end
 
 @implementation ViewController
@@ -24,20 +26,29 @@
     self.view.backgroundColor = [UIColor whiteColor];
     
     
-    UIButton *addBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, 100, 100, 40)];
-    addBtn.titleLabel.textAlignment = NSTextAlignmentRight;
-    [addBtn setTitle:@"选择日期" forState:UIControlStateNormal];
-    [addBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [addBtn addTarget:self action:@selector(addBtnAction) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:addBtn];
+    UIButton *selectBtn = [[UIButton alloc] initWithFrame:CGRectMake(40, 100, 100, 40)];
+    selectBtn.titleLabel.textAlignment = NSTextAlignmentRight;
+    selectBtn.layer.borderColor = [UIColor grayColor].CGColor;
+    selectBtn.layer.borderWidth = 0.5;
+    [selectBtn setTitle:@"选择日期" forState:UIControlStateNormal];
+    [selectBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [selectBtn addTarget:self action:@selector(selectBtnAction) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:selectBtn];
+    
+    self.dateLabel= [[UILabel alloc] initWithFrame:CGRectMake(40, 140 + 20, 200, 40)];
+    self.dateLabel.font = [UIFont systemFontOfSize:14.0];
+    self.dateLabel.textColor = [UIColor blueColor];
+    [self.view addSubview:self.dateLabel];
 }
-- (void)addBtnAction {
+- (void)selectBtnAction {
     self.datePickerView.hidden = NO;
 }
 
 - (void)printDate:(NSString *)dateStr
 {
     NSLog(@"你选择的日期是:%@", dateStr);
+    NSString *formateStr = [dateStr stringByReplacingOccurrencesOfString:@"-" withString:@"/"];
+    self.dateLabel.text = [NSString stringWithFormat:@"你选择的日期是:%@", formateStr];
 }
 
 #pragma mark - setMethods
@@ -46,9 +57,11 @@
     if (!_datePickerView) {
         _datePickerView = [[DPMDatePickerView alloc] initWithFrame:CGRectMake(0, APPH - 260, APPW, 260)];
         __weak typeof(self) weakSelf = self;
+        __block NSInteger count = 0;
         _datePickerView.cancelBlock = ^{
             typeof(weakSelf) strongSelf = weakSelf;
             strongSelf.datePickerView.hidden = YES;
+            count = 3;
         };
         _datePickerView.okBlock = ^(NSString *dateStr) {
             typeof(weakSelf) strongSelf = weakSelf;
